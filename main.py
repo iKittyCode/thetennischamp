@@ -39,7 +39,7 @@ characters = [
 ]
 class Player(charachter): 
     def __init__(self, pos_x, pos_y): 
-        
+        print("placeholder")
 
 def draw_start_menu():
     screen.blit(start_menu_image, (0, 0))
