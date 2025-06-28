@@ -31,15 +31,16 @@ novakchoose_x = -novakimage.get_width()
 novakchoose_y=151
 novakchooseslide_target_x = 418
 selected_index = 0  
-
+ 
 characters = [
     {"image": fedimage, "x": lambda: fedchoose_x, "y": fedchoose_y},
     {"image": rafaimage, "x": lambda: rafachoose_x, "y": rafachoose_y},
     {"image": novakimage, "x": lambda: novakchoose_x, "y": novakchoose_y}
 ]
+
 class Player(charachter): 
     def __init__(self, pos_x, pos_y): 
-        
+        print("placeholder")
 
 
 def draw_start_menu():
