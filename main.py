@@ -37,6 +37,7 @@ characters = [
     {"image": rafaimage, "x": lambda: rafachoose_x, "y": rafachoose_y},
     {"image": novakimage, "x": lambda: novakchoose_x, "y": novakchoose_y}
 ]
+
 class Player(charachter): 
     def __init__(self, pos_x, pos_y): 
         print("placeholder")
