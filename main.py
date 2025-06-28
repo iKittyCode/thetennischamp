@@ -31,7 +31,7 @@ novakchoose_x = -novakimage.get_width()
 novakchoose_y=151
 novakchooseslide_target_x = 418
 selected_index = 0  
-
+ 
 characters = [
     {"image": fedimage, "x": lambda: fedchoose_x, "y": fedchoose_y},
     {"image": rafaimage, "x": lambda: rafachoose_x, "y": rafachoose_y},
