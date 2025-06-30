@@ -1,11 +1,18 @@
 import pygame
 import time
 pygame.init()
-
+choosen = None
 screen = pygame.display.set_mode((600, 400))
 pygame.display.set_caption("The Championships")
 clock = pygame.time.Clock()
 running = True
+player = None
+enemy = None
+ball = None
+playerframes = []
+frame = pygame.image.load("images/mainchar1/tile012.png").convert_alpha()
+frame = pygame.transform.scale_by(frame, 1.5)
+playerframes.append(frame)
 
 game_state = "start_menu"
 start_menu_image = pygame.image.load("images/startscreen.png")
@@ -38,9 +45,50 @@ characters = [
     {"image": novakimage, "x": lambda: novakchoose_x, "y": novakchoose_y}
 ]
 
-class Player(charachter): 
-    def __init__(self, pos_x, pos_y): 
-        print("placeholder")
+playerbounds =  pygame.Rect(0, screen.get_height() // 2, screen.get_width(), screen.get_height() // 2)
+
+class Player:
+    def __init__(self, frames, x, y):
+        self.frames = frames
+        self.frame_index = 0
+        self.image = frames[0]
+        self.rect = pygame.Rect(x, y, frames[0].get_width(), frames[0].get_height())
+        self.speed = 5
+        self.anim_timer = 0
+        self.anim_delay = 100  # milliseconds between frames
+
+    def move(self, keys):
+        moved = False
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= self.speed
+            moved = True
+        if keys[pygame.K_RIGHT]:
+            self.rect.x += self.speed
+            moved = True
+        if keys[pygame.K_UP]:
+            self.rect.y -= self.speed
+            moved = True
+        if keys[pygame.K_DOWN]:
+            self.rect.y += self.speed
+            moved = True
+
+        # If moved, animate
+        if moved:
+            now = pygame.time.get_ticks()
+            if now - self.anim_timer > self.anim_delay:
+                self.anim_timer = now
+                self.frame_index = (self.frame_index + 1) % len(self.frames)
+                self.image = self.frames[self.frame_index]
+        else:
+            # Idle frame
+            self.frame_index = 0
+            self.image = self.frames[0]
+        self.rect.clamp_ip(playerbounds)
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect.topleft)
+
+                  
 
 
 def draw_start_menu():
@@ -55,8 +103,12 @@ def slideon(image, current_x, target_x, y, speed):
     screen.blit(image, (current_x, y))
     return current_x
 def gameplay(): 
+    keys = pygame.key.get_pressed()
     screen.fill((0,0,0))
+
     screen.blit(pygame.image.load("images/gamebackground.png"), (0,0))
+    player.move(keys)
+    player.draw(screen)
     pygame.display.update()
 
 def draw_choose_menu():
@@ -85,7 +137,9 @@ while running:
         if game_state == "start_menu":
             draw_start_menu()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                
                 game_state = "choose_menu"
+
         
 
     if game_state == "choose_menu":
@@ -103,9 +157,11 @@ while running:
                     last_move_time = current_time
                 elif event.key == pygame.K_RETURN:
                     print(f"You selected character #{selected_index}") 
+                    player = Player(playerframes, 32, 32)
                     game_state = "gameplay"
 
     if game_state == "gameplay":
+ 
         gameplay()
 
     clock.tick(45)
