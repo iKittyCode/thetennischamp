@@ -1,5 +1,7 @@
 import pygame
 import time
+import enemy
+import random
 pygame.init()
 paused = False 
 choosen = None
@@ -8,8 +10,8 @@ pygame.display.set_caption("The Championships")
 clock = pygame.time.Clock()
 running = True
 player = None
-enemy = None
-ball = None
+
+
 
 
 playerframes = []
@@ -39,7 +41,10 @@ novakchoose_x = -novakimage.get_width()
 novakchoose_y=151
 novakchooseslide_target_x = 418
 selected_index = 0  
- 
+opponentframes = []
+opponentframes.append(pygame.transform.scale_by(pygame.image.load("images/opponentimages/tile000.png").convert_alpha(), 1.5))
+opponentframes.append(pygame.transform.scale_by(pygame.image.load("images/opponentimages/tile001.png").convert_alpha(), 1.5))
+
 characters = [
     {"image": fedimage, "x": lambda: fedchoose_x, "y": fedchoose_y},
     {"image": rafaimage, "x": lambda: rafachoose_x, "y": rafachoose_y},
@@ -67,6 +72,7 @@ class Ball:
         self.rect = self.image.get_rect(center=(x, y))
         self.velocity = pygame.Vector2(0, 0)
         self.served = False
+        self.landed_in = None
 
     def serve(self, direction):
         if not self.served:
@@ -113,6 +119,9 @@ class Player:
         self.serve_index = 0
         self.serve_timer = 0
         self.serve_delay = 60
+        self.return_cooldown = 500
+        self.last_return_time = 0
+        self.return_direction_toggle = True  
 
     def move(self, keys):
         if self.serving:
@@ -150,7 +159,7 @@ class Player:
             self.serve_index = 0
             self.serve_timer = pygame.time.get_ticks()
 
-    def update(self):
+    def update(self, ball):
         
         if self.serving:
             now = pygame.time.get_ticks()
@@ -165,9 +174,29 @@ class Player:
                 # Serve finished
                     self.serving = False
                     self.image = self.frames[0]  # Return to idle
+        if ball.landed_in:
+            self.try_return(ball)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect.topleft)
+    def try_return(self, ball):
+        now = pygame.time.get_ticks()
+        if now - self.last_return_time < self.return_cooldown:
+            return
+
+        if self.rect.colliderect(ball.rect):
+            self.last_return_time = now
+            target_x = (screen.get_width() // 2) + random.uniform(-60, 60)
+            target_y = 50 + random.uniform(-10, 10)
+
+        
+            dx = target_x - ball.rect.centerx
+            dy = target_y - ball.rect.centery  
+
+            direction = pygame.Vector2(dx, dy).normalize() * 5
+            ball.velocity = direction
+
+
 
 
 
@@ -186,63 +215,97 @@ def slideon(image, current_x, target_x, y, speed):
     screen.blit(image, (current_x, y))
     return current_x
 def gameplay():
-    
-    keys = pygame.key.get_pressed()
     screen.fill((0, 0, 0))
     screen.blit(pygame.image.load("images/gamebackground.png"), (0, 0))
+    
+   
+    left_service_box = pygame.Rect(185, 90, 115, 78)  
+    right_service_box = pygame.Rect(300, 90, 108, 78)
+    
+   
+    pygame.draw.rect(screen, (0, 255, 0), left_service_box, 1)
+    pygame.draw.rect(screen, (0, 255, 0), right_service_box, 1)
 
+    keys = pygame.key.get_pressed()
+    
     if not paused:
         if ball and not ball.served:
             ball.followplayer(player)
-        if keys[pygame.K_r]:
-            if not player.isfirstserve:
-                player.currentsidedeuce = not player.currentsidedeuce
-            player.isfirstserve = not player.isfirstserve
-            
-            
-            time.sleep(0.3)
+            player.rect.y = 360
+
+        if keys[pygame.K_r] and not ball.served:
+            time.sleep(0.1)
             
             if ball and not ball.served:
-
                 player.serve()
                 
-                if player.rect.x < 310:
+                
+                if player.currentsidedeuce:
+                    serve_direction = (-3, -4) 
+                    ball.target_service_box = left_service_box
+                else:
+                    serve_direction = (3, -4) 
+                    ball.target_service_box = right_service_box
+                
+                ball.serve(serve_direction)
+                ball.landed_in = False  
 
-                    ball.serve((3, -4))
-                else: 
-                    ball.serve((-3, -4))
-
-        if not ball.served: 
-            if player.currentsidedeuce and player.isfirstserve: 
-                player.rect.x = 360
-            elif not player.currentsidedeuce and player.isfirstserve: 
+        
+        if not ball.served:
+            if player.currentsidedeuce:
+                player.rect.x = 360  
+                player.rect.y = 370
+                opponent.rect.x = 190
+                opponent.rect.y = 0
+            else:
                 player.rect.x = 220
+                player.rect.y = 370  
+                opponent.rect.x = 360
+                opponent.rect.y = 0
+                
 
-
+       
         if ball and ball.served:
-            ball.draw(screen)
-        if ball:
             ball.update(player)
-            # Reset ball if it goes out of bounds
-            if ball.rect.left > screen.get_width() or \
-                ball.rect.right < 0 or \
-                ball.rect.top > screen.get_height() or \
-                ball.rect.bottom < 0:
+            ball.draw(screen)
+            
+           
+            if not ball.landed_in and ball.rect.colliderect(ball.target_service_box):
+                ball.landed_in = True
+            
+            
+            if (ball.rect.right < 0 or ball.rect.left > screen.get_width() or
+                ball.rect.bottom < 0 or ball.rect.top > screen.get_height()):
+                
+                if ball.landed_in:
+                   
+                    player.currentsidedeuce = not player.currentsidedeuce
+                    player.isfirstserve = True  
+                else:
+                    
+                    if player.isfirstserve:
+                        player.isfirstserve = False
+                    else:
+                        
+                        player.isfirstserve = True
+                        player.currentsidedeuce = not player.currentsidedeuce
+                
                 ball.reset(player.rect.centerx + 30, player.rect.centery - 10)
-    player.update()
+
+    player.update(ball)
     player.move(keys)
-
-    
     player.draw(screen)
+    opponent.update(ball, screen)
 
+    opponent.draw(screen)
+    
 
     if paused:
         pause_text = font.render("PAUSED", True, (255, 0, 0))
-        pause_rect = pause_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+        pause_rect = pause_text.get_rect(center=(screen.get_width()//2, screen.get_height()//2))
         screen.blit(pause_text, pause_rect)
 
     pygame.display.update()
-
 def draw_choose_menu():
     screen.fill((195, 230, 158))
     text_surface = font.render("CHOOSE YOUR CHARACHTER", True, (0, 0, 0))
@@ -292,6 +355,7 @@ while running:
                     print(f"You selected character #{selected_index}") 
                     player = Player(playerframes, 360, 370, server_frames)
                     ball = Ball(player.rect.centerx + 30, player.rect.centery - 10)
+                    opponent = enemy.Enemy(opponentframes, 190, 0)
                     game_state = "gameplay"
 
     if game_state == "gameplay":
