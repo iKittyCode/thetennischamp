@@ -193,7 +193,7 @@ class Player:
             dx = target_x - ball.rect.centerx
             dy = target_y - ball.rect.centery  
 
-            direction = pygame.Vector2(dx, dy).normalize() * 7
+            direction = pygame.Vector2(dx, dy).normalize() * 8.4
             ball.velocity = direction
 
 
