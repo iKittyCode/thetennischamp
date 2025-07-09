@@ -186,14 +186,14 @@ class Player:
 
         if self.rect.colliderect(ball.rect):
             self.last_return_time = now
-            target_x = (screen.get_width() // 2) + random.uniform(-60, 60)
+            target_x = (screen.get_width() // 2) + random.uniform(-76, 76)
             target_y = 50 + random.uniform(-10, 10)
 
         
             dx = target_x - ball.rect.centerx
             dy = target_y - ball.rect.centery  
 
-            direction = pygame.Vector2(dx, dy).normalize() * 5
+            direction = pygame.Vector2(dx, dy).normalize() * 7
             ball.velocity = direction
 
 

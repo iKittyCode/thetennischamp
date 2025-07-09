@@ -9,7 +9,7 @@ class Enemy:
         self.speed = 3
         self.anim_timer = 0
         self.anim_delay = 300
-        self.return_cooldown = 500
+        self.return_cooldown = 850
         self.last_return_time = 0
         self.return_direction_toggle = True  
 
@@ -39,7 +39,7 @@ class Enemy:
 
         if self.rect.colliderect(ball.rect) or abs(ball.rect.centery - self.rect.centery) < 20:
             self.last_return_time = now
-            target_x = (screen.get_width() // 2) + random.uniform(-60, 60)
+            target_x = (screen.get_width() // 2) + random.uniform(-90, 100)
             target_y = 370 + random.uniform(-10, 10)
 
         
