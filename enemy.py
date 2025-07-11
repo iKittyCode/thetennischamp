@@ -14,19 +14,22 @@ class Enemy:
         self.return_direction_toggle = True  
 
     def update(self, ball, screen):
+        
         if ball and ball.served:
             
-            if ball.rect.centerx < self.rect.centerx:
+            threshold = 30
+            if ball.rect.centerx < self.rect.centerx - threshold:
                 self.rect.x -= self.speed
-            elif ball.rect.centerx > self.rect.centerx:
+            elif ball.rect.centerx > self.rect.centerx + threshold:
                 self.rect.x += self.speed
-
             
             now = pygame.time.get_ticks()
-            if now - self.anim_timer > self.anim_delay:
-                self.anim_timer = now
-                self.frame_index = (self.frame_index + 1) % len(self.frames)
-                self.image = self.frames[self.frame_index]
+            if self.rect.x > 230: 
+                self.image = self.frames[1]
+            else:
+                self.image = self.frames[0]
+            
+
             if ball.landed_in:
 
            
@@ -43,7 +46,7 @@ class Enemy:
             target_y = 370 + random.uniform(-10, 10)
 
         
-            dx = target_x - ball.rect.centerx
+            dx = (target_x - ball.rect.centerx)
             dy = target_y - ball.rect.centery  
             direction = pygame.Vector2(dx, dy).normalize() * 5  # Speed = 5
             ball.velocity = direction
