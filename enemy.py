@@ -1,5 +1,9 @@
 import pygame
 import random
+import time
+import globalvars
+currentscore = globalvars.currentscore
+scoring = globalvars.scoring
 class Enemy:
     def __init__(self, frames, x, y):
         self.frames = frames
@@ -51,5 +55,12 @@ class Enemy:
             direction = pygame.Vector2(dx, dy).normalize() * 5  # Speed = 5
             ball.velocity = direction
             self.return_direction_toggle = not self.return_direction_toggle
+        if ball.rect.y < self.rect.y -1 and not globalvars.point_over: 
+            scoring("player")
+            globalvars.point_over = True 
+
+       
+         
+            
     def draw(self, surface):
         surface.blit(self.image, self.rect.topleft)

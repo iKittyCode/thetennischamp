@@ -2,6 +2,9 @@ import pygame
 import time
 import enemy
 import random
+import globalvars
+currentscore = globalvars.currentscore
+scoring = globalvars.scoring
 pygame.init()
 paused = False 
 choosen = None
@@ -11,6 +14,11 @@ clock = pygame.time.Clock()
 running = True
 player = None
 
+
+
+
+        
+        
 
 
 
@@ -289,7 +297,10 @@ def gameplay():
                         
                         player.isfirstserve = True
                         player.currentsidedeuce = not player.currentsidedeuce
-                
+                        scoring("enemy")
+
+
+                globalvars.point_over = False
                 ball.reset(player.rect.centerx + 30, player.rect.centery - 10)
 
     player.update(ball)
@@ -304,6 +315,7 @@ def gameplay():
         pause_text = font.render("PAUSED", True, (255, 0, 0))
         pause_rect = pause_text.get_rect(center=(screen.get_width()//2, screen.get_height()//2))
         screen.blit(pause_text, pause_rect)
+        print(currentscore)
 
     pygame.display.update()
 def draw_choose_menu():
