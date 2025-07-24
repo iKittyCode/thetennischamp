@@ -233,6 +233,8 @@ def slideon(image, current_x, target_x, y, speed):
             current_x = target_x
     screen.blit(image, (current_x, y))
     return current_x
+def tiebreak():
+    print("is neccesary")
 def gameplay():
     screen.fill((0, 0, 0))
     screen.blit(pygame.image.load("images/gamebackground.png"), (0, 0))
@@ -331,7 +333,9 @@ def gameplay():
                     globalvars.point_over = False
                     ball.reset(player.rect.centerx + 30, player.rect.centery - 10)
         else:
-            # Opponent is serving
+            if currentscore["opponentgamescore"] == 0 and currentscore["playergamescore"] == 0:
+                opponent.currentsidedeuce = True
+            
             if ball and not ball.served:
                 # Position opponent for serving
                 if opponent.currentsidedeuce:
@@ -353,17 +357,18 @@ def gameplay():
             if ball and not ball.served and not opponent.serving:
                 current_time = pygame.time.get_ticks()
                 if current_time - opponent.last_return_time > 2000:  # 1 second delay
+                    # opponent.serve()
+                    # opponent.draw(screen)
+                    # opponent.update(ball, screen)
+                    # if opponent.currentsidedeuce:
+                    #     serve_direction = (4, 4)  # To right service box
+                    #     ball.target_service_box = right_service_box
+                    # else:
+                    #     serve_direction = (-4, 4)  # To left service box
+                    #     ball.target_service_box = left_service_box
+                    # ball.serve(serve_direction)
+                    # ball.landed_in = False
                     opponent.serve()
-                    opponent.draw(screen)
-                    opponent.update(ball, screen)
-                    if opponent.currentsidedeuce:
-                        serve_direction = (3, 4)  # To right service box
-                        ball.target_service_box = right_service_box
-                    else:
-                        serve_direction = (-3, 4)  # To left service box
-                        ball.target_service_box = left_service_box
-                    ball.serve(serve_direction)
-                    ball.landed_in = False
 
             # Ball handling
             if ball and ball.served:
@@ -387,8 +392,9 @@ def gameplay():
                             opponent.isfirstserve = True
                             opponent.currentsidedeuce = not opponent.currentsidedeuce
                             scoring("player")
-
+                    opponent.update(ball, screen)
                     globalvars.point_over = False
+                    
                     ball.reset(opponent.rect.centerx, opponent.rect.centery + 50)
 
 
@@ -396,7 +402,10 @@ def gameplay():
     player.move(keys)
     player.draw(screen)
     opponent.update(ball, screen)
-
+    if currentscore["winner"] != None:
+        winnertext = font.render("Winner: " + currentscore["winner"], True, (255,0,0))
+        winnerrect = winnertext.get_rect(center=(screen.get_width()//2, screen.get_height()//2))
+        screen.blit(winnertext, winnerrect)
     opponent.draw(screen)
     
 

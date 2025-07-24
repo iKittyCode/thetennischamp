@@ -4,7 +4,8 @@ currentscore = {
     "playersetscore": 0, 
     "opponentgamescore":0,
     "winner": None,
-    "opponentsetscore":0
+    "opponentsetscore":0,
+    "istiebreak" : False
 
 }
 isplayerserving = True
@@ -24,6 +25,8 @@ def scoring(pointwin):
             
             if currentscore["playersetscore"] != 6:
                 currentscore["playersetscore"] +=1
+                if currentscore["playersetscore"] == 6 and currentscore["opponentsetscore"] < 5: 
+                    currentscore["winner"] = "player"
 
         elif currentscore["playergamescore"] == 40 and currentscore["opponentgamescore"] == 40: 
             currentscore["playergamescore"] = 1 # AD scoring system
@@ -64,11 +67,17 @@ def scoring(pointwin):
             isplayerserving = not isplayerserving
 
             
-            if currentscore["opponentsetcore"] != 6:
-                currentscore["opponentsetscore"] +=1 
+
+
+
+            
+
+             
+                
         elif currentscore["opponentgamescore"] == -1:
             currentscore["playergamescore"] = 40
             currentscore["opponentgamescore"] = 40
+
         
             
             

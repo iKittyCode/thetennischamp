@@ -4,7 +4,7 @@ import time
 import globalvars
 
 class Enemy:
-     def __init__(self, frames, x, y, serve_frames):
+    def __init__(self, frames, x, y, serve_frames):
          self.frames = frames
          self.frame_index = 0
          self.image = frames[0]
@@ -23,32 +23,43 @@ class Enemy:
          self.currentsidedeuce = True
          self.isfirstserve = True
 
-     def update(self, ball, screen):
-         if self.serving:
-             now = pygame.time.get_ticks()
-             if now - self.serve_timer >= self.serve_delay:
-                 self.serve_timer = now
-                 if self.serve_index < len(self.serve_frames):
-                     self.image = self.serve_frames[self.serve_index]
-                     self.serve_index += 1
-                 else:
-                     self.serving = False
-                     self.image = self.frames[0]
+    def update(self, ball, screen):
+        now = pygame.time.get_ticks()
+        
+        if self.serving:
+            if now - self.serve_timer >= self.serve_delay:
+                self.serve_timer = now
+                if self.serve_index < len(self.serve_frames):
+                    self.image = self.serve_frames[self.serve_index]
+                    self.serve_index += 1
+                else:
+                    self.serving = False
+                    self.image = self.frames[0]
 
-         if ball and ball.served:
-             threshold = 30
-             if ball.rect.centerx < self.rect.centerx - threshold:
-                 self.rect.x -= self.speed
-             elif ball.rect.centerx > self.rect.centerx + threshold:
-                 self.rect.x += self.speed
+                    # Serve the ball only after animation completes
+                    if not ball.served:
+                        if self.currentsidedeuce:
+                            serve_direction = (4, 4)
+                            ball.target_service_box = pygame.Rect(300, 90, 108, 78)
+                        else:
+                            serve_direction = (-4, 4)
+                            ball.target_service_box = pygame.Rect(185, 90, 115, 78)
+                        ball.serve(serve_direction)
+                        ball.landed_in = False
 
-             now = pygame.time.get_ticks()
-             self.image = self.frames[1] if self.rect.x > 230 else self.frames[0]
+        # Continue tracking and reacting to ball even outside serving
+        if ball and ball.served:
+            threshold = 30
+            if ball.rect.centerx < self.rect.centerx - threshold:
+                self.rect.x -= self.speed
+            elif ball.rect.centerx > self.rect.centerx + threshold:
+                self.rect.x += self.speed
 
-             if ball.landed_in:
-                 self.try_return(ball, screen)
+            self.image = self.frames[1] if self.rect.x > 230 else self.frames[0]
 
-     def try_return(self, ball, screen):
+            if ball.landed_in:
+                self.try_return(ball, screen)
+    def try_return(self, ball, screen):
          now = pygame.time.get_ticks()
          if now - self.last_return_time < self.return_cooldown:
              return
@@ -67,10 +78,10 @@ class Enemy:
              globalvars.scoring("player")
              globalvars.point_over = True
 
-     def draw(self, surface):
+    def draw(self, surface):
          surface.blit(self.image, self.rect.topleft)
 
-     def serve(self):
+    def serve(self):
          if not self.serving:
              self.serving = True
              self.serve_index = 0
